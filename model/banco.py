@@ -34,12 +34,16 @@ class Banco:
     elif(table.lower() == 'illness'): 
       fields = '''(code, description, severity_description, risk_mortality, medical_surgical)'''
     
-    self.banco.execute(f'''
-    INSERT INTO {table}{fields} 
-    Values{values}
-    ''')    
-    self._con.commit()
-    
+    try:
+      self.banco.execute(f'''
+      INSERT INTO {table}{fields} 
+      Values{values}
+      ''')    
+      self._con.commit()
+      return 200
+    except:
+      return 400
+      
   def get_all(self, table: str, fields: str ='*') -> List[Tuple]:
     values : List = []
     for x in self.banco.execute(f'SELECT {fields} FROM {table}'):
@@ -54,13 +58,24 @@ class Banco:
     elif(table.lower() == 'illness'): 
       fields_search ='code'
     
-    self.banco.execute(f'''
-      UPDATE {table}
-      SET {fields_edit}                   
-      WHERE {fields_search}={id}
-    ''')
-    self._con.commit()
+    try:
+      self.banco.execute(f'''
+        UPDATE {table}
+        SET {fields_edit}                   
+        WHERE {fields_search}={id}
+      ''')
+      self._con.commit()
+      return 200
+    except sqlite3.ex:
+      return 400
 
+  def delete(self, table: str, id: str):
+    self.banco.execute(f'DELETE FROM {table} WHERE id={id}')
+    self._con.commit()
+ 
+ 
+
+ 
 """     
 banco = Banco()
 def popular():
