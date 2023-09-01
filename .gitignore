@@ -3,5 +3,7 @@ etc/
 share/
 Lib/
 Scripts/
-*.cfg
+__pycache__/
+pyvenv.cfg
 *.csv
+*.db

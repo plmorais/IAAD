@@ -58,6 +58,7 @@ def read_doencas(layout, at):
   items = banco.get_all('illness')
   #(code, description, severity_description, risk_mortality, medical_surgical)
   for i, item in enumerate(items):
+    layout.write('<hr>', unsafe_allow_html=True)
     c1,c2,c3,c4, c5,c6 = layout.columns(fields)
     c1.write(item[0])
     c2.write(item[1])

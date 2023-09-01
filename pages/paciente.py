@@ -13,7 +13,7 @@ st.title("Formulário de paciente")
 banco = Banco()
 
 def inputs_doencas(layout):
-  with st.expander("Adicione um paciente"):
+  with layout.expander("Adicione um paciente"):
     hospitais = {'':''}
     for hospital in banco.get_all('hospital'):
       h = (hospital[1:][0].title(), hospital[1:][1].title(), hospital[1:][2].title(),)
@@ -31,7 +31,7 @@ def inputs_doencas(layout):
       input_admission = st.selectbox(label="Insira qual seu tipo de admissão",options=['',"Emergência","Eletivo","Outro"])
       input_disposition = st.selectbox(label="Insira sua dispoição",options=['',"Casa ou autocuidado","Casa com serviços de saúde domiciliar","Outro"])
       input_hospital = st.selectbox(label='Hospital (nome, area, condado)', options=hospitais)
-      input_illness = st.selectbox(label='Hospital (nome, area, condado)', options=illnesses)
+      input_illness = st.selectbox(label='Doença (nome, area, condado)', options=illnesses)
       input_costs = st.number_input(label="Insira seu custo")
       submit = st.form_submit_button("Enviar")
 
@@ -39,11 +39,10 @@ def inputs_doencas(layout):
       
       if submit:
         flag = [
-          input_age == '',
+          input_age == 0,
           input_gender == '',
           input_race == '',
           input_ethnicity == '',
-          input_stay == 0,
           input_admission == '',
           input_disposition == '',
           input_illness == '',
@@ -74,15 +73,16 @@ def inputs_doencas(layout):
 def read_doencas(layout, at):
   container = layout.container()
   layout.title('Consultar Dados')
-  fields = (.5, .5, .6, .6, .4, .5, .5, 1, 1, 1, 1.5,)
+  fields = (.5, .5, .6, .9, .4, .5, .5, .9, 1.1, 1, 1.1,)
   colunas = layout.columns(fields)
-  campos = ['ID', 'Age', 'Gender',  'Ethnicity', 'Rance', 'Stay', 'Admission', 'Costs', 'Desc. illness', 'Hospital Name' 'Excluir']
+  campos = ['ID', 'Age', 'Gender',  'Ethnicity', 'Rance', 'Stay', 'Admission', 'Costs', 'Desc. illness', 'Hospital Name', 'Excluir']
   for coluna, campo in zip(colunas,campos):
     coluna.write(campo)
   items = banco.get_pacient()
   #(age, gender, race, ethnicity, stay, admission, disposition, costs, code, hospital_id) a
-  c_1, _ = st.columns((8, 2))
+  
   for i, item in enumerate(items):
+    layout.write('<hr>', unsafe_allow_html=True)
     c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10 = layout.columns(fields)
     c0.write(item['id'])
     c1.write(item['age'])
@@ -96,52 +96,75 @@ def read_doencas(layout, at):
     c9.write(item['hospital_name'])
     delete = c10.button('Excluir', key=str(item['id']))
     
+    
     if delete:
       banco.delete('pacient', item['id'])
       st.experimental_rerun()
       
 def update_doencas(at):
-  with at.form(key="update_doencas", clear_on_submit = False):
-    c1, c2 = st.columns((1, 1))
-    last_code = c1.number_input(label="Código APR DRG", step=1, )
-    new_code = c2.number_input(label='Novo Código APR DRG', step=1)
-    update_description = st.text_input(label="Descrição do Diagnóstico")
-    update_serverity_descrip = st.selectbox(
-      label="Descrição da gravidade da doença", 
-      options=['',"Menor", "Moderdo", "Maior", "Extremo"]
-    )
-    update_risk_mortality = st.selectbox(
-      label="Risco de Mortalidade", 
-      options=['',"Menor", "Moderdo", "Maior", "Extremo"]
-    )
-    update_medical_surgical = st.selectbox(
-      label="Tipo de Caso", 
-      options=['', "Cirurgico", "Médico", "Outro"]
-    )
-    update_button = st.form_submit_button("Atualizar")
+  with at.expander("Atualize um paciente"):
+    hospitais = {'':''}
+    for hospital in banco.get_all('hospital'):
+      h = (hospital[1:][0].title(), hospital[1:][1].title(), hospital[1:][2].title(),)
+      hospitais[h] = hospital[0]
+    illnesses = {'':''}
+    for illness in banco.get_all('illness', 'code, description, medical_surgical'):
+      illnesses[(illness[1:][0].title(), illness[1:][1].title())] = illness[0]
+      
     
-    #('code INT PRIMARY KEY, description, severity_description TEXT, risk_mortality TEXT, medical_surgical TEXT')
-    if update_button:
-      update_txt= ''
-      if(update_description != ''):
-        update_txt += f' description="{update_description}"'
-      if(update_serverity_descrip != ''):
-        update_txt += f' severity_description="{update_serverity_descrip}"'
-      if(update_risk_mortality != ''):
-        update_txt += f' risk_mortality="{update_risk_mortality}"'
-      if(update_medical_surgical != ''):
-        update_txt += f' medical_surgical="{update_medical_surgical}"'
-      if(new_code != last_code):
-        update_txt += f' id="{new_code}"'
-      print(update_txt.replace('" ', '", '))
-      if(banco.update('illness', update_txt.replace('" ', '", '), last_code) == 200):
-        at.title(':green[Doencas atualizado com sucesso]')
-      else:
-        at.title(':orange[Doencas não cadastrado]') 
-      sleep(.5)
-      st.experimental_rerun()
+    with st.form(key="update_paciente"):
+      c1, c2 = st.columns((1, 1))
+      last_code = c1.number_input(label="Código do Hospital", step=1, )
+      new_code = c2.number_input(label="Novo código para o Hospital", step=1, )
+      update_age = st.number_input(label="Insira sua idade", format="%d", step=1, min_value=0)
+      update_gender = st.selectbox(label="Selecione seu gênero",options=['',"Feminino","Masculino","Outro"])
+      update_race = st.selectbox(label="Selecione sua raça",options=['',"Branco","Preto","Outro"])
+      update_ethnicity = st.selectbox(label="Insira seu etnia",options=['',"Não é espanhol/hispânico","Espanhol/hispânico","Outro"])
+      update_stay = st.number_input(label="Insira seu tempo de estadia", format="%d", step=1, min_value=0)
+      update_admission = st.selectbox(label="Insira qual seu tipo de admissão",options=['',"Emergência","Eletivo","Outro"])
+      update_disposition = st.selectbox(label="Insira sua dispoição",options=['',"Casa ou autocuidado","Casa com serviços de saúde domiciliar","Outro"])
+      update_hospital = st.selectbox(label='Hospital (nome, area, condado)', options=hospitais)
+      update_illness = st.selectbox(label='Doença (nome, area, condado)', options=illnesses)
+      update_costs = st.number_input(label="Insira seu custo", min_value=0)
+      update_button = st.form_submit_button("Enviar")
+    
+      # (age, gender, race, ethnicity, stay, admission, disposition, costs, code, hospital_id)
+      
+      if update_button:
+        update_txt= ''
+        if(update_age != 0):
+          update_txt += f' age="{update_age}"'
+        if(update_gender != ''):
+          update_txt += f' gender="{update_gender}"'
+        if(update_race != ''):
+          update_txt += f' race="{update_race}"'
+        if(update_ethnicity != ''):
+          update_txt += f' ethnicity="{update_ethnicity}"'
+        if(update_stay != 0):
+          update_txt += f' stay="{update_stay}"'
+        if(update_admission != ''):
+          update_txt += f' admission="{update_admission}"'
+        if(update_disposition != ''):
+          update_txt += f' disposition="{update_disposition}"'
+        if(update_costs != 0):
+          update_txt += f' costs="{update_costs}"'
+        if(update_illness != ''):
+          update_txt += f' code="{illnesses[update_illness]}"'
+        if(update_hospital != ''):
+          update_txt += f' hospital_id="{hospitais[update_hospital]}"'
+        if(new_code != last_code):
+          update_txt += f' id="{new_code}"'
+        
+        update_txt = update_txt.replace('" ', '", ')
+        if(update_txt != ''):
+          if(banco.update('pacient', update_txt, last_code) == 200):
+            at.title(':green[Paciente atualizado com sucesso]')
+          else:
+            at.title(':orange[Paciente não cadastrado]') 
+          sleep(.7)
+          st.experimental_rerun()
 
-insert, at = st.tabs(["Inserir Doencas", "Procurar Doencas"])
+insert, at = st.tabs(["Inserir Paciente", "Atualizar Paciente"])
 inputs_doencas(insert)
 update_doencas(at)
 

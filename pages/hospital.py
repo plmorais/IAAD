@@ -43,8 +43,8 @@ def read_hospital(layout, at):
   for coluna, campo in zip(colunas,campos):
     coluna.write(campo)
   items = banco.get_all('hospital')
-
   for i, item in enumerate(items):
+    layout.write('<hr>', unsafe_allow_html=True)
     c1,c2,c3,c4,c6 = layout.columns((1,2,2,2,1.5))
     c1.write(item[0])
     c2.write(item[1])

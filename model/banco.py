@@ -59,7 +59,6 @@ class Banco:
       INNER JOIN hospital ON hospital.id=pacient.hospital_id
     ''')
     for x in result:
-      print(f'{x}1')
       values.append({
         "id": x[0],
         "age": x[1],
