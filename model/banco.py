@@ -49,6 +49,32 @@ class Banco:
     for x in self.banco.execute(f'SELECT {fields} FROM {table}'):
       values.append(x)
     return values
+  
+  def get_pacient(self) -> List[Tuple]:
+    values : List = []
+    fields = 'pacient.pacient_id, pacient.age, pacient.gender, pacient.ethnicity, pacient.race, pacient.stay, pacient.admission, pacient.costs, illness.description, hospital.hospital_name'
+    result = self.banco.execute(f'''
+      SELECT {fields} 
+      FROM pacient INNER JOIN illness ON pacient.code=illness.code
+      INNER JOIN hospital ON hospital.id=pacient.hospital_id
+    ''')
+    for x in result:
+      print(f'{x}1')
+      values.append({
+        "id": x[0],
+        "age": x[1],
+        'gender': x[2],
+        'ethnicity': x[3],
+        'race': x[4],
+        'stay': x[5],
+        'admission': x[6],
+        'costs': x[7],
+        'description': x[8],
+        'hospital_name': x[9],
+      })
+    return values
+    #['ID', 'Age', 'Gender', 'Rance', 'Ethnicity', 'Stay', 'Admission', 'Costs', 'Desc. illness', 'Hospital Name' 'Excluir']
+    
 
   def update(self, table: str, fields_edit: str, id: int):
     """ Coloque as aspas duplas em uma string """
@@ -66,16 +92,22 @@ class Banco:
       ''')
       self._con.commit()
       return 200
-    except sqlite3.ex:
+    except:
       return 400
 
   def delete(self, table: str, id: str):
-    self.banco.execute(f'DELETE FROM {table} WHERE id={id}')
+    if(table.lower() == 'pacient'):
+      fields = 'pacient_id'
+    elif(table.lower() == 'hospital'): 
+      fields = 'id'
+    elif(table.lower() == 'illness'): 
+      fields = 'code'
+    
+    self.banco.execute(f'DELETE FROM {table} WHERE {fields}={id}')
     self._con.commit()
  
  
 
- 
 """     
 banco = Banco()
 def popular():
