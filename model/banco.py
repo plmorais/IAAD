@@ -15,8 +15,8 @@ class Banco:
     pacient_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, age int NOT NULL, gender TEXT, race TEXT, 
     ethnicity TEXT, stay int NOT NULL, admission TEXT, disposition TEXT, 
     code INT, hospital_id INT NOT NULL, costs REAL NOT NULL,
-    FOREIGN KEY(code) REFERENCES illeness(code) ON UPDATE CASCADE,
-    FOREIGN KEY(hospital_id) REFERENCES hospital(id)
+    FOREIGN KEY(code) REFERENCES illeness(code) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY(hospital_id) REFERENCES hospital(id) ON UPDATE CASCADE ON DELETE CASCADE
     ''') 
 
   def create_table(self, table: str, fields):
@@ -74,7 +74,6 @@ class Banco:
     return values
     #['ID', 'Age', 'Gender', 'Rance', 'Ethnicity', 'Stay', 'Admission', 'Costs', 'Desc. illness', 'Hospital Name' 'Excluir']
     
-
   def update(self, table: str, fields_edit: str, id: int):
     """ Coloque as aspas duplas em uma string """
     fields_search = 'pacient_id'
@@ -105,7 +104,52 @@ class Banco:
     self.banco.execute(f'DELETE FROM {table} WHERE {fields}={id}')
     self._con.commit()
  
- 
+  def search_pacient(self, filter: str):
+    values : List = []
+    fields = 'pacient.pacient_id, pacient.age, pacient.gender, pacient.ethnicity, pacient.race, pacient.stay, pacient.admission, pacient.costs, illness.description, hospital.hospital_name'
+    """ result = self.banco.execute(f'
+      SELECT {fields} 
+      FROM pacient INNER JOIN illness ON pacient.code=illness.code
+      INNER JOIN hospital ON hospital.id=pacient.hospital_id
+    ')
+    for x in result:
+      values.append({
+        "id": x[0],
+        "age": x[1],
+        'gender': x[2],
+        'ethnicity': x[3],
+        'race': x[4],
+        'stay': x[5],
+        'admission': x[6],
+        'costs': x[7],
+        'description': x[8],
+        'hospital_name': x[9],
+      })
+     """
+    result = self.banco.execute(f'''
+      SELECT {fields} 
+      FROM pacient INNER JOIN illness ON pacient.code=illness.code
+      INNER JOIN hospital ON hospital.id=pacient.hospital_id
+      WHERE {filter}
+    ''')
+    
+    for x in result:
+      values.append({
+        "id": x[0],
+        "age": x[1],
+        'gender': x[2],
+        'ethnicity': x[3],
+        'race': x[4],
+        'stay': x[5],
+        'admission': x[6],
+        'costs': x[7],
+        'description': x[8],
+        'hospital_name': x[9],
+      })
+    return values
+
+
+
 
 """     
 banco = Banco()

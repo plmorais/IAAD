@@ -29,8 +29,7 @@ def format_length_stay(value) -> int:
   return int(value)
 data['Length of Stay'] = data['Length of Stay'].apply(format_length_stay)
 data = data.sample(500, replace=False)
-data.to_parquet('model/hospital.parquet')
- """
+data.to_parquet('model/hospital.parquet') """
 
 def load_hospitais():
   # id, hospital_name, service_area, county
@@ -78,7 +77,7 @@ def load_pacient():
     elif x[0] == 'F': gender = 'Feminino'
     else: gender = 'Outro'
     
-    if x[1] == 'White': race = 'Masculino'
+    if x[1] == 'White': race = 'Branco'
     elif x[1] == 'Black/African American': race = 'Preto'
     else: race = 'Outra raça'
     

@@ -12,7 +12,7 @@ st.set_page_config(
 st.title("Formulário de paciente")
 banco = Banco()
 
-def inputs_doencas(layout):
+def inputs_pacient(layout):
   with layout.expander("Adicione um paciente"):
     hospitais = {'':''}
     for hospital in banco.get_all('hospital'):
@@ -70,7 +70,10 @@ def inputs_doencas(layout):
         else:
           st.title(f':red[Deixou {flag.count(True)} campos em banco]')
       
-def read_doencas(layout, at):
+  read = layout.container()
+  read_pacient(read, 'input', banco.get_pacient())
+  
+def read_pacient(layout, id, items):
   container = layout.container()
   layout.title('Consultar Dados')
   fields = (.5, .5, .6, .9, .4, .5, .5, .9, 1.1, 1, 1.1,)
@@ -78,7 +81,7 @@ def read_doencas(layout, at):
   campos = ['ID', 'Age', 'Gender',  'Ethnicity', 'Rance', 'Stay', 'Admission', 'Costs', 'Desc. illness', 'Hospital Name', 'Excluir']
   for coluna, campo in zip(colunas,campos):
     coluna.write(campo)
-  items = banco.get_pacient()
+  #items = banco.get_pacient()
   #(age, gender, race, ethnicity, stay, admission, disposition, costs, code, hospital_id) a
   
   for i, item in enumerate(items):
@@ -94,14 +97,14 @@ def read_doencas(layout, at):
     c7.write(item['costs'])
     c8.write(item['description'])
     c9.write(item['hospital_name'])
-    delete = c10.button('Excluir', key=str(item['id']))
+    delete = c10.button('Excluir', key=f'{id} {item["id"]}')
     
     
     if delete:
       banco.delete('pacient', item['id'])
       st.experimental_rerun()
       
-def update_doencas(at):
+def update_pacient(at):
   with at.expander("Atualize um paciente"):
     hospitais = {'':''}
     for hospital in banco.get_all('hospital'):
@@ -164,10 +167,91 @@ def update_doencas(at):
           sleep(.7)
           st.experimental_rerun()
 
-insert, at = st.tabs(["Inserir Paciente", "Atualizar Paciente"])
-inputs_doencas(insert)
-update_doencas(at)
+  read = at.container()
+  read_pacient(read, 'update', banco.get_pacient())  
+  
+def search_pacient(layout):
+  data = []
+  with layout.expander("Procure o paciente"):
+    hospitais = {'':''}
+    for hospital in banco.get_all('hospital'):
+      h = (hospital[1:][0].title(), hospital[1:][1].title(), hospital[1:][2].title(),)
+      hospitais[h] = hospital[0]
+    illnesses = {'':''}
+    for illness in banco.get_all('illness', 'code, description, medical_surgical'):
+      illnesses[(illness[1:][0].title(), illness[1:][1].title())] = illness[0]
+      
+    with st.form(key="search_paciente"):
+      
+      search_gender = st.selectbox(
+        label="Selecione seu gênero",
+        options=['',"Feminino","Masculino","Outro"])
+      search_race = st.selectbox(
+        label="Selecione sua raça",
+        options=['',"Branco","Preto","Outro"])
+      search_ethnicity = st.selectbox(
+        label="Insira seu etnia",
+        options=['',"Não é espanhol/hispânico","Espanhol/hispânico","Outro"]
+        )
+      c1, c2 = st.columns((.9, .9))
+      search_stay = c1.number_input(
+        label="Tempo de estadia inicial", format="%d", step=1, min_value=0
+        )
+      search_stay2 = c2.number_input(
+        label="Tempo de estadia final", format="%d", step=1, min_value=0
+        )
+      search_admission = st.selectbox(
+        label="Insira qual seu tipo de admissão",options=['',"Emergência","Eletivo","Outro"]
+        )
+      search_disposition = st.selectbox(
+        label="Insira sua dispoição", 
+        options=['',"Casa ou autocuidado", "Casa com serviços de saúde domiciliar","Outro"]
+        )
+      search_hospital = st.selectbox(
+        label='Hospital (nome, area, condado)', options=hospitais
+        )
+      search_illness = st.selectbox(
+        label='Doença (nome, area, condado)', options=illnesses
+        )
+      
+      search_button = st.form_submit_button("Buscar")
+    
+      # (age, gender, race, ethnicity, stay, admission, disposition, costs, code, hospital_id)
+      
+      if search_button:
+        search_txt= [f'pacient.stay>={search_stay}']
+        if(search_gender != ''):
+          search_txt.append(f'pacient.gender="{search_gender}"')
+        if(search_race != ''):
+          search_txt.append(f'pacient.race="{search_race}"')
+        if(search_ethnicity != ''):
+          search_txt.append(f'pacient.ethnicity="{search_ethnicity}"')
+        if(search_stay2 != 0):
+          search_txt.append(f'pacient.stay<={search_stay2}')
+        if(search_admission != ''):
+          search_txt.append(f'pacient.admission="{search_admission}"')
+        if(search_disposition != ''):
+          search_txt.append(f'pacient.disposition="{search_disposition}"')
+        if(search_illness != ''):
+          search_txt.append(f'pacient.code={illnesses[search_illness]}')
+        if(search_hospital != ''):
+          search_txt.append(f'pacient.hospital_id={hospitais[search_hospital]}')
+        
+        search_txt = ' AND '.join(search_txt)
+        if(search_txt != ''):
+          st.write(search_txt)
+          data = banco.search_pacient(search_txt)
+          
+          #st.experimental_rerun() 
+  
+  read = layout.container()
+  read_pacient(read, 'search', data)  
 
-read = st.container()
-read_doencas(read, at)
+  
+insert, at, search = st.tabs(["Inserir Paciente", "Atualizar Paciente", 'Procure Pacientes'])
+inputs_pacient(insert)
+update_pacient(at)
+search_pacient(search)
+
+
 
