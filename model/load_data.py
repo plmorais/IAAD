@@ -49,9 +49,15 @@ def load_illnesses():
                             
                           ]).size().reset_index(name='Qtn')
   for x in illnesses.values[:, :5]:
-    severity = choice(["Menor", "Moderdo", "Maior", "Extremo"])
-    mortality = choice(["Menor", "Moderdo", "Maior", "Extremo"])
-    banco.insert('illness', (x[0], x[1], severity, mortality, x[2]))
+    severity = choice(["Menor", "Moderado", "Maior", "Extremo"])
+    mortality = choice(["Menor", "Moderado", "Maior", "Extremo"])
+    medical = ''
+    if (x[2] == 'Medical'):
+      mediacal = "Médico"
+    elif (x[2] == 'Surgical'):
+      medical = "Cirurgico"
+    else: medical = "Outro"
+    banco.insert('illness', (x[0], x[1], severity, mortality, medical))
     
 def load_pacient():
   banco = Banco()

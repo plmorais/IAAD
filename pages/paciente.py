@@ -156,7 +156,7 @@ def update_pacient(at):
         if(update_hospital != ''):
           update_txt += f' hospital_id="{hospitais[update_hospital]}"'
         if(new_code != last_code):
-          update_txt += f' id="{new_code}"'
+          update_txt += f' pacient_id="{new_code}"'
         
         update_txt = update_txt.replace('" ', '", ')
         if(update_txt != ''):

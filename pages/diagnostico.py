@@ -79,11 +79,11 @@ def update_doencas(at):
     update_description = st.text_input(label="Descrição do Diagnóstico")
     update_serverity_descrip = st.selectbox(
       label="Descrição da gravidade da doença", 
-      options=['',"Menor", "Moderdo", "Maior", "Extremo"]
+      options=['',"Menor", "Moderado", "Maior", "Extremo"]
     )
     update_risk_mortality = st.selectbox(
       label="Risco de Mortalidade", 
-      options=['',"Menor", "Moderdo", "Maior", "Extremo"]
+      options=['',"Menor", "Moderado", "Maior", "Extremo"]
     )
     update_medical_surgical = st.selectbox(
       label="Tipo de Caso", 
@@ -103,8 +103,8 @@ def update_doencas(at):
       if(update_medical_surgical != ''):
         update_txt += f' medical_surgical="{update_medical_surgical}"'
       if(new_code != last_code):
-        update_txt += f' id="{new_code}"'
-      print(update_txt.replace('" ', '", '))
+        update_txt += f' code={new_code}'
+      print(update_txt.replace('" ', '", '), last_code)
       if(banco.update('illness', update_txt.replace('" ', '", '), last_code) == 200):
         at.title(':green[Doencas atualizado com sucesso]')
       else:
