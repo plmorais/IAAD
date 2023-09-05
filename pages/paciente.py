@@ -22,7 +22,7 @@ def inputs_pacient(layout):
     for illness in banco.get_all('illness', 'code, description, medical_surgical'):
       illnesses[(illness[1:][0].title(), illness[1:][1].title())] = illness[0]
       
-    with st.form(key="include_paciente"):
+    with st.form(key="include_paciente", clear_on_submit = False):
       input_age = st.number_input(label="Insira sua idade", format="%d", step=1)
       input_gender = st.selectbox(label="Selecione seu gênero",options=['',"Feminino","Masculino","Outro"])
       input_race = st.selectbox(label="Selecione sua raça",options=['',"Branco","Preto","Outro"])
@@ -62,7 +62,6 @@ def inputs_pacient(layout):
             illnesses[input_illness],
             hospitais[input_hospital]
           )
-          print(pacient)
           if(banco.insert('pacient', pacient) == 200):
             st.title(':green[Paciente cadastrado com sucesso]')
           else:
@@ -115,7 +114,7 @@ def update_pacient(at):
       illnesses[(illness[1:][0].title(), illness[1:][1].title())] = illness[0]
       
     
-    with st.form(key="update_paciente"):
+    with st.form(key="update_paciente", clear_on_submit = False):
       c1, c2 = st.columns((1, 1))
       last_code = c1.number_input(label="Código do Hospital", step=1, )
       new_code = c2.number_input(label="Novo código para o Hospital", step=1, )
@@ -150,7 +149,7 @@ def update_pacient(at):
         if(update_disposition != ''):
           update_txt += f' disposition="{update_disposition}"'
         if(update_costs != 0):
-          update_txt += f' costs="{update_costs}"'
+          update_txt += f' costs={update_costs}'
         if(update_illness != ''):
           update_txt += f' code="{illnesses[update_illness]}"'
         if(update_hospital != ''):

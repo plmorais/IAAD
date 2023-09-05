@@ -104,7 +104,7 @@ def update_doencas(at):
         update_txt += f' medical_surgical="{update_medical_surgical}"'
       if(new_code != last_code):
         update_txt += f' code={new_code}'
-      print(update_txt.replace('" ', '", '), last_code)
+      #print(update_txt.replace('" ', '", '), last_code)
       if(banco.update('illness', update_txt.replace('" ', '", '), last_code) == 200):
         at.title(':green[Doencas atualizado com sucesso]')
       else:

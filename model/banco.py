@@ -148,10 +148,6 @@ class Banco:
       })
     return values
 
-
-banco = Banco()
-banco.update(table='illness', fields_edit='id=52', id=21)
-print('i')
 """     
 banco = Banco()
 def popular():

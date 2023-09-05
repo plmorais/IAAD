@@ -77,7 +77,7 @@ def update_hospital(at):
         update_txt += f' service_area="{update_service}"'
       if(new_code != last_code):
         update_txt += f' id="{new_code}"'
-      print(update_txt.replace('" ', '", '))
+      #print(update_txt.replace('" ', '", '))
       if(banco.update('hospital', update_txt.replace('" ', '", '), last_code) == 200):
         at.title(':green[Hospital atualizado com sucesso]')
       else:
