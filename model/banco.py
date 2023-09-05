@@ -18,6 +18,19 @@ class Banco:
     FOREIGN KEY(code) REFERENCES illeness(code) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY(hospital_id) REFERENCES hospital(id) ON UPDATE CASCADE ON DELETE CASCADE
     ''') 
+    
+    self.banco.execute(
+      '''
+        CREATE TRIGGER IF NOT EXISTS AplicarDesconto
+        AFTER INSERT ON pacient
+        FOR EACH ROW
+        BEGIN
+            UPDATE pacient
+            SET costs = costs * 0.93 -- Aplica um desconto de 7%
+            WHERE NEW.age >= 60 AND NEW.pacient_id = pacient_id;
+        END;
+      ''')
+    self._con.commit()
 
   def create_table(self, table: str, fields):
     self.banco.execute(f'CREATE TABLE IF NOT EXISTS {table}({fields})')
@@ -148,8 +161,13 @@ class Banco:
       })
     return values
 
-"""     
-banco = Banco()
+
+""" banco = Banco()
+banco.insert('pacient', (60, 'm', 'white', 'brazileiro', 15, 'extreme', 'dead', 100, 0, 1),)
+for x in banco.get_all('pacient'):
+  print(x)
+   """
+""" 
 def popular():
   test = [
   (0, 'descri;ao do primeiro', 'white', 'baixo', 'Mode'),
